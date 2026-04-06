@@ -423,6 +423,14 @@ function mega_bridge_flush_cache() {
     delete_option( 'kadence_gutenberg_global_block_css' );
     $flushed[] = 'kadence_css_cache';
 
+    // LiteSpeed via WP-CLI (Hostinger CDN layer — must be purged or browsers see stale HTML)
+    $wp_cli = trim( shell_exec( 'which wp 2>/dev/null || which wp-cli 2>/dev/null || echo "/usr/local/bin/wp-cli-2.12.0.phar"' ) );
+    $wp_path = ABSPATH;
+    $output  = shell_exec( "$wp_cli litespeed-purge all --path=" . escapeshellarg( $wp_path ) . " 2>&1" );
+    if ( $output && strpos( $output, 'Purged' ) !== false ) {
+        $flushed[] = 'litespeed_cli';
+    }
+
     return [ 'flushed' => $flushed, 'timestamp' => time() ];
 }
 
