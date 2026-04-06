@@ -244,7 +244,7 @@ function mega_bridge_set_theme_mod( WP_REST_Request $request ) {
 }
 
 function mega_bridge_get_kadence_css() {
-    return [ 'css' => get_option( 'kadence_custom_css', '' ) ];
+    return [ 'css' => wp_get_custom_css() ];
 }
 
 function mega_bridge_set_kadence_css( WP_REST_Request $request ) {
@@ -255,8 +255,14 @@ function mega_bridge_set_kadence_css( WP_REST_Request $request ) {
         return new WP_Error( 'missing_css', 'Provide {"css": "..."} in the JSON body.', [ 'status' => 400 ] );
     }
 
-    update_option( 'kadence_custom_css', $css );
-    return [ 'saved' => true, 'length' => strlen( $css ) ];
+    // wp_update_custom_css_post is the correct WP core function — this is what Kadence outputs to the page.
+    // update_option('kadence_custom_css') is a dead option that Kadence no longer reads.
+    $result = wp_update_custom_css_post( $css );
+    if ( is_wp_error( $result ) ) {
+        return new WP_Error( 'css_save_failed', $result->get_error_message(), [ 'status' => 500 ] );
+    }
+
+    return [ 'saved' => true, 'length' => strlen( $css ), 'post_id' => $result->ID ];
 }
 
 function mega_bridge_get_kadence_settings() {
