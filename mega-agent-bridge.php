@@ -206,8 +206,8 @@ function mega_bridge_extract_body_classes( $html ) {
 }
 
 function mega_bridge_extract_header_class( $html ) {
-    preg_match( '/site-main-header-wrap[^"]*"/', $html, $m );
-    return $m[0] ?? '';
+    preg_match( '/class="([^"]*site-main-header-wrap[^"]*)"/', $html, $m );
+    return $m[1] ?? '';
 }
 
 function mega_bridge_get_all_theme_mods() {
